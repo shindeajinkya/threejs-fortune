@@ -9,16 +9,18 @@ import * as dat from "lil-gui";
 THREE.ColorManagement.enabled = false;
 
 let textToDisplayWithLineBreaks;
+const isTesting = false;
 
 /**
  * Base
  */
 // Debug
 // const gui = new dat.GUI();
-
-const userName = prompt("Enter your name: ");
-
-fetchFortune();
+let userName;
+if (!isTesting) {
+  userName = prompt("Enter your name: ");
+  fetchFortune();
+}
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -89,6 +91,9 @@ scene.add(pointLight);
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+if (window.innerWidth < 720) {
+  controls.enabled = false;
+}
 
 /**
  * Renderer
@@ -109,9 +114,9 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   // Update controls
-  controls.update();
 
   if (window.innerWidth > 720) {
+    controls.update();
     camera.position.x = Math.sin(elapsedTime) * Math.PI;
     camera.position.y = Math.cos(elapsedTime) * Math.PI;
   }
@@ -126,31 +131,37 @@ const tick = () => {
 
 tick();
 
+if (isTesting) {
+  fetchFortune();
+}
+
 if ("ondeviceorientation" in window) {
   window.addEventListener("deviceorientation", (event) => {
     const { alpha, beta, gamma } = event;
-    camera.position.x += (gamma / 100 - camera.position.x) * 1.5;
-    camera.position.y += (-beta / 100 - camera.position.y) * 1;
+    // camera.position.x += gamma / 100 - camera.position.x * 0.5;
+    // camera.position.y += (-beta / 100 - camera.position.y) * 0.5;
+    camera.position.x = (gamma / 100) * 8;
+    camera.position.y = (-beta / 100) * 5;
+    camera.position.z = (alpha / 100) * 16;
+    camera.lookAt(new THREE.Vector3());
   });
 }
 
 async function fetchFortune() {
   try {
-    const response = await fetch(
-      "https://fortune-cookie2.p.rapidapi.com/fortune",
-      {
-        method: "GET",
-        headers: {
-          "x-rapidapi-key":
-            "c63b96f006msh5e9e6857f4a0adfp1c62b8jsne56fdfff4953",
-          "x-rapidapi-host": "fortune-cookie2.p.rapidapi.com",
-        },
-      }
-    );
-    const data = await response.json();
-    fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
-      // break line every 6 words
-      // const textToDisplay = `${userName}, \n ${data.answer}`;
+    if (!isTesting) {
+      const response = await fetch(
+        "https://fortune-cookie2.p.rapidapi.com/fortune",
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-key":
+              "c63b96f006msh5e9e6857f4a0adfp1c62b8jsne56fdfff4953",
+            "x-rapidapi-host": "fortune-cookie2.p.rapidapi.com",
+          },
+        }
+      );
+      const data = await response.json();
       textToDisplayWithLineBreaks = data.answer
         .split(" ")
         .reduce((acc, word, index) => {
@@ -159,6 +170,11 @@ async function fetchFortune() {
           }
           return `${acc} ${word}`;
         }, `${userName},`);
+    } else {
+      textToDisplayWithLineBreaks = "Testing";
+    }
+
+    fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
       const textGeometry = new TextGeometry(textToDisplayWithLineBreaks, {
         font,
         size: 1,
@@ -189,7 +205,8 @@ async function fetchFortune() {
 
       scene.add(text);
 
-      console.time("donuts");
+      camera.lookAt(text.position);
+
       const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
       const donutMaterial = new THREE.MeshMatcapMaterial({
         matcap: matcap8Texture,
@@ -214,7 +231,6 @@ async function fetchFortune() {
 
         scene.add(donut);
       }
-      console.timeEnd("donuts");
     });
   } catch (error) {
     console.log(error);
