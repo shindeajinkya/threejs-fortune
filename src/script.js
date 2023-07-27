@@ -136,21 +136,20 @@ if (isTesting) {
 }
 
 if ("ondeviceorientation" in window) {
-  if (typeof DeviceOrientationEvent.requestPermission === "function") {
-    // Handle iOS 13+ devices.
-    DeviceOrientationEvent.requestPermission()
-      .then((state) => {
-        if (state === "granted") {
-          window.addEventListener("deviceorientation", handleOrientation);
-        } else {
-          console.error("Request to access the orientation was rejected");
-        }
-      })
-      .catch(console.error);
-  } else {
-    // Handle regular non iOS 13+ devices.
-    window.addEventListener("deviceorientation", handleOrientation);
-  }
+  // if (typeof DeviceOrientationEvent.requestPermission === "function") {
+  //   // Handle iOS 13+ devices.
+  //   DeviceOrientationEvent.requestPermission()
+  //     .then((state) => {
+  //       if (state === "granted") {
+  //         window.addEventListener("deviceorientation", handleOrientation);
+  //       } else {
+  //         console.error("Request to access the orientation was rejected");
+  //       }
+  //     })
+  //     .catch(console.error);
+  // } else {
+  //   // Handle regular non iOS 13+ devices.
+  window.addEventListener("deviceorientation", handleOrientation);
 }
 
 function handleOrientation(event) {
