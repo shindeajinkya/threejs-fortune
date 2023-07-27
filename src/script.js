@@ -129,8 +129,8 @@ tick();
 if ("ondeviceorientation" in window) {
   window.addEventListener("deviceorientation", (event) => {
     const { alpha, beta, gamma } = event;
-    camera.position.x += (gamma / 100 - camera.position.x) * 0.8;
-    camera.position.y += (-beta / 100 - camera.position.y) * 0.8;
+    camera.position.x += (gamma / 100 - camera.position.x) * 1;
+    camera.position.y += (-beta / 100 - camera.position.y) * 1;
   });
 }
 
