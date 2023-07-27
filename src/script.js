@@ -8,6 +8,8 @@ import * as dat from "lil-gui";
 
 THREE.ColorManagement.enabled = false;
 
+let textToDisplayWithLineBreaks;
+
 /**
  * Base
  */
@@ -109,8 +111,10 @@ const tick = () => {
   // Update controls
   controls.update();
 
-  camera.position.x = Math.sin(elapsedTime) * Math.PI;
-  camera.position.y = Math.cos(elapsedTime) * Math.PI;
+  if (window.innerWidth > 720) {
+    camera.position.x = Math.sin(elapsedTime) * Math.PI;
+    camera.position.y = Math.cos(elapsedTime) * Math.PI;
+  }
   //   camera.position.z = Math.sin(elapsedTime);
 
   // Render
@@ -121,6 +125,14 @@ const tick = () => {
 };
 
 tick();
+
+if ("ondeviceorientation" in window) {
+  window.addEventListener("deviceorientation", (event) => {
+    const { alpha, beta, gamma } = event;
+    camera.position.x += (gamma / 100 - camera.position.x) * 0.05;
+    camera.position.y += (-beta / 100 - camera.position.y) * 0.05;
+  });
+}
 
 async function fetchFortune() {
   try {
@@ -139,7 +151,7 @@ async function fetchFortune() {
     fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
       // break line every 6 words
       // const textToDisplay = `${userName}, \n ${data.answer}`;
-      const textToDisplayWithLineBreaks = data.answer
+      textToDisplayWithLineBreaks = data.answer
         .split(" ")
         .reduce((acc, word, index) => {
           if (index % 6 === 0) {
